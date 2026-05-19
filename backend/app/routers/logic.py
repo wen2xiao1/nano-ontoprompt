@@ -1,0 +1,44 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from app.deps import get_db, get_current_user
+from app.models.logic import LogicRule
+from app.schemas.logic import LogicRuleCreate, LogicRuleUpdate, LogicRuleOut
+import uuid
+
+router = APIRouter()
+
+@router.get("")
+def list_logic(ontology_id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+    items = db.query(LogicRule).filter(LogicRule.ontology_id == ontology_id).all()
+    return {"data": [LogicRuleOut.model_validate(r).model_dump() for r in items]}
+
+@router.post("", status_code=201)
+def create_logic(ontology_id: str, body: LogicRuleCreate, db: Session = Depends(get_db), _=Depends(get_current_user)):
+    data = {k: v for k, v in body.model_dump().items() if v is not None}
+    r = LogicRule(id=str(uuid.uuid4()), ontology_id=ontology_id, **data)
+    db.add(r); db.commit(); db.refresh(r)
+    return {"data": LogicRuleOut.model_validate(r).model_dump()}
+
+@router.get("/{logic_id}")
+def get_logic(ontology_id: str, logic_id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+    r = db.query(LogicRule).filter(LogicRule.id == logic_id, LogicRule.ontology_id == ontology_id).first()
+    if not r:
+        raise HTTPException(404, "Not found")
+    return {"data": LogicRuleOut.model_validate(r).model_dump()}
+
+@router.put("/{logic_id}")
+def update_logic(ontology_id: str, logic_id: str, body: LogicRuleUpdate, db: Session = Depends(get_db), _=Depends(get_current_user)):
+    r = db.query(LogicRule).filter(LogicRule.id == logic_id, LogicRule.ontology_id == ontology_id).first()
+    if not r:
+        raise HTTPException(404, "Not found")
+    for k, v in body.model_dump(exclude_none=True).items():
+        setattr(r, k, v)
+    db.commit(); db.refresh(r)
+    return {"data": LogicRuleOut.model_validate(r).model_dump()}
+
+@router.delete("/{logic_id}", status_code=204)
+def delete_logic(ontology_id: str, logic_id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+    r = db.query(LogicRule).filter(LogicRule.id == logic_id, LogicRule.ontology_id == ontology_id).first()
+    if not r:
+        raise HTTPException(404, "Not found")
+    db.delete(r); db.commit()
