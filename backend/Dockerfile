@@ -2,7 +2,7 @@
 FROM python:3.12-slim
 
 # 安装 bcrypt 必须的编译依赖（CentOS7 Docker 内必备）
-RUN sed -i 's|deb.debian.org|mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list
+RUN sed -i 's|deb.debian.org|mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list.d/debian.sources
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     g++ \
