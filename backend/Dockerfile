@@ -2,7 +2,7 @@
 FROM python:3.12-slim
 
 # 安装 bcrypt 必须的编译依赖（CentOS7 Docker 内必备）
-RUN sed -i 's|deb.debian.org|mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list \
+RUN sed -i 's|deb.debian.org|mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     g++ \
@@ -21,9 +21,6 @@ RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 # 安装你要的三个库（强制固定版本，不飘）
 RUN pip install --upgrade pip && \
-    pip install python-multipart && \
-    pip install passlib==1.7.4 && \
-    pip install bcrypt==4.1.0 && \
     pip install --no-cache-dir -r requirements.txt
 
 # 复制代码
