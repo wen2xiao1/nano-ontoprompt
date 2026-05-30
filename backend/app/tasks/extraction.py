@@ -1,3 +1,6 @@
+from app.models.user import User
+from app.models.ontology import OntologyProject
+
 from celery import Celery
 from app.config import settings
 
